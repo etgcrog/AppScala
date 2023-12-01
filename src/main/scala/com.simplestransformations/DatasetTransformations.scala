@@ -6,7 +6,7 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.Encoders
 import org.apache.spark.sql.functions._
-import com.example.utils.{ReadFiles, LogManager}
+import com.example.utils.{ReadFiles, LogConfiguration}
 
 
 object DatasetTransformations{
@@ -24,7 +24,7 @@ object DatasetTransformations{
 
   def main(args: Array[String]): Unit ={
     // Configuração do Logger
-    LogManager.setupLogging()
+    LogConfiguration.configureLogging()
     // Instanciando as configuracoes
     val sparkConf = ReadFiles.readSparkConfig
 
