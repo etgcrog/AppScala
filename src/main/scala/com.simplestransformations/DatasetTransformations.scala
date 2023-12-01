@@ -6,17 +6,15 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.Encoders
 import org.apache.spark.sql.functions._
-import org.apache.log4j.{Level, Logger, BasicConfigurator}
+import com.example.utils.{ReadFiles, LogManager}
 
-import com.example.utils.ReadFiles
 
 object DatasetTransformations{
 
   // Define a case class that represents the structure of your data
   case class SalesRecord(transactionId: Int, customerId: Int, productId: Int, quantity: Option[Int], price: Double)
 
-  def showSparkConfig(): Unit = {
-    val sparkConfig = ReadFiles.readSparkConfig
+  def showSparkConfig(sparkConfig: SparkConf): Unit = {
     val listParams = sparkConfig.toDebugString
     println(s"Sessão configurada com os parâmetros:")
     println("-" * 50)
@@ -26,16 +24,12 @@ object DatasetTransformations{
 
   def main(args: Array[String]): Unit ={
     // Configuração do Logger
-    BasicConfigurator.configure()
-    Logger.getRootLogger.setLevel(Level.ERROR)
-    Logger.getLogger("org").setLevel(Level.ERROR)
-    Logger.getLogger("akka").setLevel(Level.ERROR)
-    Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
-    
+    LogManager.setupLogging()
+    // Instanciando as configuracoes
     val sparkConf = ReadFiles.readSparkConfig
 
     // Exibe as configurações do Spark
-    showSparkConfig()
+    showSparkConfig(sparkConf)
 
     // Criação da SparkSession com a configuração obtida
     val spark = SparkSession.builder()
