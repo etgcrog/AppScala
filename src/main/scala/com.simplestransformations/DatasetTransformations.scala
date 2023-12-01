@@ -1,3 +1,5 @@
+package com.simplestransformations
+
 // Import Spark SQL and Datasets libraries
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.Dataset
@@ -6,33 +8,21 @@ import org.apache.spark.sql.Encoders
 import org.apache.spark.sql.functions._
 import org.apache.log4j.{Level, Logger, BasicConfigurator}
 
-import com.example.Main.ReadFiles
+import com.example.utils.ReadFiles
 
 object DatasetTransformations{
 
   // Define a case class that represents the structure of your data
   case class SalesRecord(transactionId: Int, customerId: Int, productId: Int, quantity: Option[Int], price: Double)
 
-  val sparkConfig = ReadFiles.readSparkConfig
-  println(s"Sessao configurada com os parametros: $sparkConfig")
-
-  // Create sparkSession
-  val spark = SparkSession.builder()
-              .master("local[3]")
-              .config(sparkConfig)
-              .getOrCreate()
-
-  // Import implicits for automatic conversions from RDDs to DataFrames
-  import spark.implicits._
-
-  // Load data into a Dataset
-  val data = Seq(
-    SalesRecord(1, 23, 101, None, 24.99),
-    SalesRecord(2, 5, 103, Some(2), 99.95),
-    SalesRecord(3, 17, 104, Some(1), 14.95),
-    SalesRecord(4, 23, 101, Some(3), 24.99),
-    SalesRecord(5, 9, 102, Some(2), 49.50)
-  )
+  def showSparkConfig(): Unit = {
+    val sparkConfig = ReadFiles.readSparkConfig
+    val listParams = sparkConfig.toDebugString
+    println(s"Sessão configurada com os parâmetros:")
+    println("-" * 50)
+    println(listParams)
+    println("-" * 50)
+  }
 
   def main(args: Array[String]): Unit ={
     // Configuração do Logger
@@ -42,10 +32,29 @@ object DatasetTransformations{
     Logger.getLogger("akka").setLevel(Level.ERROR)
     Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
     
+    val sparkConf = ReadFiles.readSparkConfig
+
+    // Exibe as configurações do Spark
+    showSparkConfig()
+
+    // Criação da SparkSession com a configuração obtida
+    val spark = SparkSession.builder()
+                  .config(sparkConf)
+                  .appName("DatasetTransformations") // Definindo nome do app
+                  .getOrCreate()
+
+    import spark.implicits._
+
+    val data = Seq(
+      SalesRecord(1, 23, 101, None, 24.99),
+      SalesRecord(2, 5, 103, Some(2), 99.95),
+      SalesRecord(3, 17, 104, Some(1), 14.95),
+      SalesRecord(4, 23, 101, Some(3), 24.99),
+      SalesRecord(5, 9, 102, Some(2), 49.50)
+    )
+
     val salesDataset = spark.createDataset(data)
 
-    // Show the original Dataset
-    // Calcular a média da coluna 'quantity'
     val averageQuantity = salesDataset
       .filter($"quantity".isNotNull)
       .agg(avg($"quantity"))
